@@ -76,23 +76,6 @@ kanpo-viewer/
 - **ベースURL**: `/api` (本番環境)
 - **ドキュメント**: `/docs` (開発環境のみ)
 
-### 主要エンドポイント
-
-#### 1. ヘルスチェック
-```http
-GET /
-```
-レスポンス:
-```json
-{
-  "message": "Kanpo PDF Download API",
-  "version": "0.1.0",
-  "endpoints": {
-    "health": "/api/pdf/health",
-    "download": "/api/pdf/download"
-  }
-}
-```
 
 ## 🚀 デプロイメント
 
