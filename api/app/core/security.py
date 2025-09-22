@@ -25,8 +25,7 @@ async def verify_api_key(credentials: Optional[HTTPAuthorizationCredentials] = S
     Raises:
         HTTPException: If authentication fails
     """
-    print("credentials", credentials)
-    print("Settings API Key:", settings.api_key)
+
     if not credentials:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
