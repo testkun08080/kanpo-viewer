@@ -12,34 +12,41 @@ settings = Settings()
 security = HTTPBearer(auto_error=False)
 
 
+# Temporarily disabled API key authentication
+# async def verify_api_key(credentials: Optional[HTTPAuthorizationCredentials] = Security(security)) -> bool:
+#     """
+#     Verify API key authentication
+#
+#     Args:
+#         credentials: Bearer authentication credentials
+#
+#     Returns:
+#         bool: True if authentication successful
+#
+#     Raises:
+#         HTTPException: If authentication fails
+#     """
+#
+#     if not credentials:
+#         raise HTTPException(
+#             status_code=status.HTTP_401_UNAUTHORIZED,
+#             detail="API key required",
+#             headers={"WWW-Authenticate": "Bearer"},
+#         )
+#
+#     if credentials.credentials != settings.api_key:
+#         raise HTTPException(
+#             status_code=status.HTTP_401_UNAUTHORIZED,
+#             detail="Invalid API key",
+#             headers={"WWW-Authenticate": "Bearer"},
+#         )
+#
+#     return True
+
 async def verify_api_key(credentials: Optional[HTTPAuthorizationCredentials] = Security(security)) -> bool:
     """
-    Verify API key authentication
-
-    Args:
-        credentials: Bearer authentication credentials
-
-    Returns:
-        bool: True if authentication successful
-
-    Raises:
-        HTTPException: If authentication fails
+    Temporary bypass for API key authentication
     """
-
-    if not credentials:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="API key required",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    if credentials.credentials != settings.api_key:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid API key",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
     return True
 
 
