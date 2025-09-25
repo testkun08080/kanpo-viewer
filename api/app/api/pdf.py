@@ -1,7 +1,8 @@
-from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends, Query
 from fastapi.responses import FileResponse
 import logging
 import os
+
 
 from ..schemas.pdf import PdfDownloadRequest
 from ..services.simple_pdf_service import SimplePdfDownloadService
@@ -19,9 +20,7 @@ async def cleanup_file(file_path: str):
 
 @router.post("/download", response_class=FileResponse)
 async def download_pdf(
-    request: PdfDownloadRequest,
-    background_tasks: BackgroundTasks,
-    authenticated: bool = Depends(verify_api_key)
+    request: PdfDownloadRequest, background_tasks: BackgroundTasks, authenticated: bool = Depends(verify_api_key)
 ):
     """
     PDFをダウンロードしてクライアントに返すAPI
@@ -35,15 +34,12 @@ async def download_pdf(
     """
     try:
         # PDFをダウンロード
-        temp_file_path, file_size = pdf_service.download_pdf(
-            str(request.url),
-            request.filename
-        )
+        temp_file_path, file_size = pdf_service.download_pdf(str(request.url), request.filename)
 
         # ファイル名の決定（リクエストで指定されているか、サービスで決定されたもの）
         filename = request.filename or os.path.basename(temp_file_path)
-        if not filename.endswith('.pdf'):
-            filename += '.pdf'
+        if not filename.endswith(".pdf"):
+            filename += ".pdf"
 
         # バックグラウンドでファイルをクリーンアップするタスクを追加
         background_tasks.add_task(cleanup_file, temp_file_path)
@@ -54,11 +50,8 @@ async def download_pdf(
         return FileResponse(
             path=temp_file_path,
             filename=filename,
-            media_type='application/pdf',
-            headers={
-                "Content-Disposition": f"attachment; filename={filename}",
-                "Content-Length": str(file_size)
-            }
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename={filename}", "Content-Length": str(file_size)},
         )
 
     except ValueError as e:
@@ -67,10 +60,30 @@ async def download_pdf(
 
     except Exception as e:
         logger.error(f"Error downloading PDF: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail="PDF download failed"
+        raise HTTPException(status_code=500, detail="PDF download failed")
+
+
+@router.get("/download")
+async def download_pdf(background_tasks: BackgroundTasks, url: str = Query(...), filename: str = Query(None)):
+    try:
+        temp_file_path, file_size = pdf_service.download_pdf(url, filename)
+        if not filename:
+            filename = os.path.basename(temp_file_path)
+        if not filename.endswith(".pdf"):
+            filename += ".pdf"
+
+        background_tasks.add_task(os.remove, temp_file_path)
+
+        return FileResponse(
+            path=temp_file_path,
+            filename=filename,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename={filename}", "Content-Length": str(file_size)},
         )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="PDF download failed")
 
 
 @router.get("/health")
